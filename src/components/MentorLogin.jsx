@@ -10,6 +10,7 @@ import { Loader2, ArrowRight, ShieldCheck } from 'lucide-react';
 export default function MentorLogin() {
     const { user, loading: authLoading } = useAuth();
     const [step, setStep] = useState('phone'); // 'phone' | 'otp'
+    const [countryCode, setCountryCode] = useState('+91');
     const [phone, setPhone] = useState('');
     const [otp, setOtp] = useState('');
     const [loading, setLoading] = useState(false);
@@ -26,8 +27,9 @@ export default function MentorLogin() {
         e.preventDefault();
         setLoading(true);
         try {
+            const fullPhone = `${countryCode}${phone.replace(/\s/g, '')}`;
             const { error } = await supabase.auth.signInWithOtp({
-                phone: phone,
+                phone: fullPhone,
             });
             if (error) throw error;
             setStep('otp');
@@ -47,8 +49,9 @@ export default function MentorLogin() {
         e.preventDefault();
         setLoading(true);
         try {
+            const fullPhone = `${countryCode}${phone.replace(/\s/g, '')}`;
             const { data, error } = await supabase.auth.verifyOtp({
-                phone: phone,
+                phone: fullPhone,
                 token: otp,
                 type: 'sms',
             });
@@ -62,7 +65,7 @@ export default function MentorLogin() {
                     navigate('/mentor-availability');
                 } else {
                     // Start Claim Process: Check if phone matches any unlinked (or even linked) mentor
-                    const claimed = await claimMentorProfile(phone, data.user.id);
+                    const claimed = await claimMentorProfile(fullPhone, data.user.id);
                     if (claimed) {
                         toast.success("Profile Linked! Logging in...");
                         navigate('/mentor-availability');
@@ -70,7 +73,7 @@ export default function MentorLogin() {
                         // Fallback: If verifying OTP worked but no profile, CREATE ONE.
                         // Ideally we should prompt user, but to unblock them we auto-create.
                         try {
-                            await import('../lib/api').then(m => m.createMentorProfile(data.user.id, phone, data.user.email));
+                            await import('../lib/api').then(m => m.createMentorProfile(data.user.id, fullPhone, data.user.email));
                             toast.success("Profile Created! Logging in...");
                             navigate('/mentor-availability');
                         } catch (createErr) {
@@ -101,18 +104,51 @@ export default function MentorLogin() {
                         <form onSubmit={handleSendOtp} className="space-y-6">
                             <div>
                                 <label className="block text-sm font-medium text-slate-700 mb-2">Phone Number</label>
-                                <div className="relative">
+                                <div className="flex">
+                                    <div className="relative">
+                                        <select
+                                            value={countryCode}
+                                            onChange={(e) => setCountryCode(e.target.value)}
+                                            className="appearance-none h-full px-3 py-3 rounded-l-lg border border-r-0 border-slate-300 bg-slate-50 text-slate-700 font-medium focus:ring-2 focus:ring-brand-500 focus:border-brand-500 focus:outline-none cursor-pointer pr-8"
+                                            style={{ minWidth: '100px' }}
+                                        >
+                                            <option value="+91">🇮🇳 +91</option>
+                                            <option value="+1">🇺🇸 +1</option>
+                                            <option value="+44">🇬🇧 +44</option>
+                                            <option value="+61">🇦🇺 +61</option>
+                                            <option value="+971">🇦🇪 +971</option>
+                                            <option value="+65">🇸🇬 +65</option>
+                                            <option value="+49">🇩🇪 +49</option>
+                                            <option value="+33">🇫🇷 +33</option>
+                                            <option value="+81">🇯🇵 +81</option>
+                                            <option value="+86">🇨🇳 +86</option>
+                                            <option value="+82">🇰🇷 +82</option>
+                                            <option value="+7">🇷🇺 +7</option>
+                                            <option value="+55">🇧🇷 +55</option>
+                                            <option value="+27">🇿🇦 +27</option>
+                                            <option value="+234">🇳🇬 +234</option>
+                                            <option value="+62">🇮🇩 +62</option>
+                                            <option value="+60">🇲🇾 +60</option>
+                                            <option value="+63">🇵🇭 +63</option>
+                                            <option value="+66">🇹🇭 +66</option>
+                                            <option value="+84">🇻🇳 +84</option>
+                                        </select>
+                                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-400">
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </div>
+                                    </div>
                                     <input
                                         type="tel"
                                         value={phone}
                                         onChange={(e) => setPhone(e.target.value)}
-                                        placeholder="+91 98765 43210"
+                                        placeholder="98765 43210"
                                         required
-                                        className="w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:outline-none pl-12"
+                                        className="flex-1 px-4 py-3 rounded-r-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 focus:outline-none"
                                     />
-                                    <span className="absolute left-4 top-3.5 text-slate-400">📞</span>
                                 </div>
-                                <p className="text-xs text-slate-500 mt-2">Enter phone number with country code (e.g. +91)</p>
+                                <p className="text-xs text-slate-500 mt-2">Scroll to change country code</p>
                             </div>
 
                             <button
@@ -129,7 +165,7 @@ export default function MentorLogin() {
                                 <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
                                     <ShieldCheck className="w-6 h-6 text-green-600" />
                                 </div>
-                                <p className="text-slate-600">Enter the 6-digit code sent to <br /><span className="font-semibold text-slate-900">{phone}</span></p>
+                                <p className="text-slate-600">Enter the 6-digit code sent to <br /><span className="font-semibold text-slate-900">{countryCode} {phone}</span></p>
                             </div>
 
                             <div>

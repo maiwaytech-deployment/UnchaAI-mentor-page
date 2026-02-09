@@ -17,6 +17,7 @@ export default function MentorForm() {
     const [formData, setFormData] = useState({
         fullName: '',
         email: '',
+        countryCode: '+91',
         phone: '',
         location: '',
         bio: '',
@@ -134,7 +135,7 @@ export default function MentorForm() {
                 personal: {
                     fullName: formData.fullName,
                     email: formData.email,
-                    phone: formData.phone,
+                    phone: `${formData.countryCode} ${formData.phone}`,
                     location: formData.location,
                     bio: formData.bio,
                     linkedin: formData.linkedin,
@@ -256,13 +257,52 @@ export default function MentorForm() {
                     </div>
                     <div>
                         <label className="block text-sm font-medium text-slate-700 mb-1">Phone Number</label>
-                        <input
-                            name="phone"
-                            value={formData.phone}
-                            onChange={handleChange}
-                            className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 focus:outline-none"
-                            placeholder="+91 98765 43210"
-                        />
+                        <div className="flex">
+                            <div className="relative">
+                                <select
+                                    name="countryCode"
+                                    value={formData.countryCode}
+                                    onChange={handleChange}
+                                    className="appearance-none h-full px-3 py-2 rounded-l-lg border border-r-0 border-slate-300 bg-slate-50 text-slate-700 font-medium focus:ring-2 focus:ring-brand-500 focus:border-brand-500 focus:outline-none cursor-pointer pr-8"
+                                    style={{ minWidth: '90px' }}
+                                >
+                                    <option value="+91">🇮🇳 +91</option>
+                                    <option value="+1">🇺🇸 +1</option>
+                                    <option value="+44">🇬🇧 +44</option>
+                                    <option value="+61">🇦🇺 +61</option>
+                                    <option value="+971">🇦🇪 +971</option>
+                                    <option value="+65">🇸🇬 +65</option>
+                                    <option value="+49">🇩🇪 +49</option>
+                                    <option value="+33">🇫🇷 +33</option>
+                                    <option value="+81">🇯🇵 +81</option>
+                                    <option value="+86">🇨🇳 +86</option>
+                                    <option value="+82">🇰🇷 +82</option>
+                                    <option value="+7">🇷🇺 +7</option>
+                                    <option value="+55">🇧🇷 +55</option>
+                                    <option value="+27">🇿🇦 +27</option>
+                                    <option value="+234">🇳🇬 +234</option>
+                                    <option value="+62">🇮🇩 +62</option>
+                                    <option value="+60">🇲🇾 +60</option>
+                                    <option value="+63">🇵🇭 +63</option>
+                                    <option value="+66">🇹🇭 +66</option>
+                                    <option value="+84">🇻🇳 +84</option>
+                                </select>
+                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-400">
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </div>
+                            </div>
+                            <input
+                                name="phone"
+                                type="tel"
+                                value={formData.phone}
+                                onChange={handleChange}
+                                className="flex-1 px-4 py-2 rounded-r-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 focus:outline-none"
+                                placeholder="98765 43210"
+                            />
+                        </div>
+                        <p className="text-xs text-slate-500 mt-1">Scroll to change country code</p>
                     </div>
                     <div>
                         <label className="block text-sm font-medium text-slate-700 mb-1">Location</label>
