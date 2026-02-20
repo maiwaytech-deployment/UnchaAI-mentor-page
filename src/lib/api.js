@@ -376,7 +376,7 @@ export async function createMentorProfile(userId, phone, email = null) {
 export async function fetchUpcomingSessions(mentorId) {
     const { data, error } = await supabase
         .from('sessions')
-        .select('id, title, scheduled_at, duration_minutes, status, meeting_url, notes')
+        .select('id, title, scheduled_at, duration_minutes, status, meeting_url, start_url, notes')
         .eq('mentor_id', mentorId)
         .eq('status', 'upcoming')
         .order('scheduled_at', { ascending: true })
@@ -395,6 +395,7 @@ export async function fetchUpcomingSessions(mentorId) {
         timeDisplay: formatSessionTime(session.scheduled_at),
         durationMinutes: session.duration_minutes,
         meetingLink: session.meeting_url,
+        startUrl: session.start_url,
         notes: session.notes,
         status: session.status
     }));

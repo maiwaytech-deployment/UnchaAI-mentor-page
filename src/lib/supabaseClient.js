@@ -15,6 +15,13 @@ export const supabase = isConfigured
     ? createClient(supabaseUrl, supabaseAnonKey)
     : {
         from: () => ({ select: () => ({ data: [], error: { message: "Supabase not configured" } }), insert: () => ({ error: { message: "Supabase not configured" } }) }),
-        auth: { signUp: () => ({ error: { message: "Supabase not configured" } }) },
-        storage: { from: () => ({ upload: () => ({ error: { message: "Supabase not configured" } }), getPublicUrl: () => ({ data: { publicUrl: "" } }) }) }
+        auth: {
+            signUp: () => ({ error: { message: "Supabase not configured" } }),
+            getSession: () => Promise.resolve({ data: { session: null }, error: null }),
+            onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => { } } } }),
+            signOut: () => Promise.resolve({ error: null })
+        },
+        storage: { from: () => ({ upload: () => ({ error: { message: "Supabase not configured" } }), getPublicUrl: () => ({ data: { publicUrl: "" } }) }) },
+        channel: () => ({ on: () => ({ subscribe: () => { } }), unsubscribe: () => { } }),
+        removeChannel: () => { }
     };

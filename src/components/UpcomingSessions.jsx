@@ -9,7 +9,8 @@ export default function UpcomingSessions({ sessions = [] }) {
         toast.success('Meeting link copied!');
     };
 
-    const handleJoinSession = (link) => {
+    const handleJoinSession = (session) => {
+        const link = session.startUrl || session.meetingLink;
         if (link) {
             window.open(link, '_blank');
         } else {
@@ -51,21 +52,23 @@ export default function UpcomingSessions({ sessions = [] }) {
                                     </div>
                                 )}
 
-                                {/* Meeting Link Display */}
-                                {session.meetingLink && (
+                                {/* Link Display (Start URL priority) */}
+                                {(session.startUrl || session.meetingLink) && (
                                     <div className="mb-3">
-                                        <div className="text-xs text-slate-500 mb-1">Meeting Link:</div>
+                                        <div className="text-xs text-slate-500 mb-1">
+                                            {session.startUrl ? 'Start Link (Host):' : 'Meeting Link:'}
+                                        </div>
                                         <div className="flex items-center gap-1 bg-white rounded border border-brand-200 p-2">
                                             <a
-                                                href={session.meetingLink}
+                                                href={session.startUrl || session.meetingLink}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 className="text-xs text-brand-600 hover:underline truncate flex-1"
                                             >
-                                                {session.meetingLink}
+                                                {session.startUrl || session.meetingLink}
                                             </a>
                                             <button
-                                                onClick={() => handleCopyLink(session.meetingLink)}
+                                                onClick={() => handleCopyLink(session.startUrl || session.meetingLink)}
                                                 className="p-1 hover:bg-brand-100 rounded transition-colors"
                                                 title="Copy link"
                                             >
@@ -77,16 +80,16 @@ export default function UpcomingSessions({ sessions = [] }) {
 
                                 {/* Join Button */}
                                 <button
-                                    onClick={() => handleJoinSession(session.meetingLink)}
-                                    disabled={!session.meetingLink}
-                                    className={`w-full py-1.5 text-white text-xs font-bold rounded flex items-center justify-center gap-1 transition-colors ${session.meetingLink
-                                            ? 'bg-brand-600 hover:bg-brand-700'
-                                            : 'bg-slate-400 cursor-not-allowed'
+                                    onClick={() => handleJoinSession(session)}
+                                    disabled={!session.meetingLink && !session.startUrl}
+                                    className={`w-full py-1.5 text-white text-xs font-bold rounded flex items-center justify-center gap-1 transition-colors ${(session.meetingLink || session.startUrl)
+                                        ? 'bg-brand-600 hover:bg-brand-700'
+                                        : 'bg-slate-400 cursor-not-allowed'
                                         }`}
                                 >
                                     <Video className="w-3 h-3" />
-                                    {session.meetingLink ? 'Join Session' : 'No Link Yet'}
-                                    {session.meetingLink && <ExternalLink className="w-3 h-3" />}
+                                    {(session.meetingLink || session.startUrl) ? 'Join Session' : 'No Link Yet'}
+                                    {(session.meetingLink || session.startUrl) && <ExternalLink className="w-3 h-3" />}
                                 </button>
                             </div>
                         ))}

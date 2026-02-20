@@ -21,15 +21,46 @@ export default function AddSlotModal({ isOpen, onClose, onSuccess, mentorId }) {
         setLoading(true);
 
         try {
-            await addAvailabilitySlot({
-                mentor_id: mentorId,
-                day_of_week: parseInt(day),
-                start_time: startTime,
-                end_time: endTime,
-                is_recurring: isRecurring,
-                is_available: true
-            });
-            toast.success("Slot added successfully");
+            // Check for overnight slot (EndTime <= StartTime)
+            if (endTime <= startTime) {
+                // Split into two slots
+                const day1 = parseInt(day);
+                const day2 = (day1 + 1) % 7;
+
+                // Slot 1: StartTime -> 23:59
+                await addAvailabilitySlot({
+                    mentor_id: mentorId,
+                    day_of_week: day1,
+                    start_time: startTime.length === 5 ? `${startTime}:00` : startTime,
+                    end_time: '23:59:59',
+                    is_recurring: isRecurring,
+                    is_available: true
+                });
+
+                // Slot 2: 00:00 -> EndTime (Next Day)
+                await addAvailabilitySlot({
+                    mentor_id: mentorId,
+                    day_of_week: day2,
+                    start_time: '00:00:00',
+                    end_time: endTime.length === 5 ? `${endTime}:00` : endTime,
+                    is_recurring: isRecurring,
+                    is_available: true
+                });
+
+                toast.success("Overnight slot added as two separate entries");
+            } else {
+                // Normal Slot
+                await addAvailabilitySlot({
+                    mentor_id: mentorId,
+                    day_of_week: parseInt(day),
+                    start_time: startTime.length === 5 ? `${startTime}:00` : startTime,
+                    end_time: endTime.length === 5 ? `${endTime}:00` : endTime,
+                    is_recurring: isRecurring,
+                    is_available: true
+                });
+                toast.success("Slot added successfully");
+            }
+
             onSuccess(); // Refresh parent
             onClose();   // Close modal
         } catch (err) {
